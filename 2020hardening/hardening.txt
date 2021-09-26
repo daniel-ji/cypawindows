@@ -1,0 +1,131 @@
+Basically stuff here that is not worth the time scripting / can't script but should take note of so don't forget
+
+BITLOCKER
+https://www.windowscentral.com/how-use-bitlocker-encryption-windows-10
+enables require additional auth at startup in gpedit by loading gpo - enabled w/ allow bitlocker w/o compatible TPM
+turns on bitlocker
+
+DNS
+https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2003/cc785404(v=ws.10)?redirectedfrom=MSDN
+https://docs.microsoft.com/en-us/windows-server/networking/dns/deploy/dns-policies-overview
+sets up dns
+dns dynamic updates: secure only
+disables recursion
+disables zone transfers
+flushes dns cache
+enables logging
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DNS\Parameters" /v "TcpReceivePacketSize" /t REG_DWORD /d 0xFF00 /f
+
+Filezilla
+https://www.alibabacloud.com/help/faq-detail/49564.htm
+https://forum.filezilla-project.org/viewtopic.php?t=3490
+https://wiki.filezilla-project.org/Securing_your_Windows_Service_installation
+sets up filezilla
+lists users & perms & privs
+sets user passwords
+enables ftp over tls
+force tls for user login
+don't show passwords in message log
+turns on logging
+turns on autoban
+maxes protection level - require matching peer ip ...
+
+FTP
+Check FTP client in IIS Manager - authentication, authorization, and logging
+Make sure to config FTP site under IIS and if Filezilla is there
+Use SSL Certificate 
+Check BENCHMARKS
+
+FIREFOX
+https://github.com/pyllyukko/user.js/
+https://chrisx.xyz/blog/yet-another-firefox-hardening-guide/
+https://github.com/arkenfox/user.js
+https://privacytools.io/browsers/
+
+IIS
+https://techcommunity.microsoft.com/t5/itops-talk-blog/windows-server-101-hardening-iis-via-security-control/ba-p/329979
+https://calcomsoftware.com/iis-10-hardening-6-configurations-changes-to-harden-iis-10-web-server/
+https://calcomsoftware.com/hardening-iis-server-guide/
+sets up iis
+turns off anonymous auth
+disables dir browsing
+enables logging
+SSL Certificate
+CHECK BENCHMARKS
+
+INTERNET
+all the security settings - protected mode and internet is high, local intranet is high, trusted sites is med high, restricted sites is high
+turns on pop up blocker, never allows websites to request physical location
+cookies are blocked, never allow session cookies
+
+DEFENSE
+sets up firewall, windows defender, uac (smartscreen is through gpedit), windows security panel
+need to turn on gpedit and services first
+
+MISC
+Remote Desktop, IE ESC, NIC Teaming
+
+WORDPRESS
+https://wpengine.com/blog/15-ways-harden-wordpress-security/
+https://help.one.com/hc/en-us/articles/360002104398-Disable-file-editing-in-WordPress-admin
+https://www.wpbeginner.com/wordpress-security/
+https://www.malcare.com/blog/wordpress-hardening/
+https://wordpress.org/support/article/hardening-wordpress/
+Deleting bad plugins
+Installing security plugins (Login Lockdown, Inactive Logout, Sucuri Security)
+Checking PW and Usernames
+Make log in dir not default, change admin login, limit logon attempts ^ (plugin)
+Hide Wordpress version
+in functions.php
+/* Hide WP version strings from scripts and styles
+ * @return {string} $src
+ * @filter script_loader_src
+ * @filter style_loader_src
+ */
+function fjarrett_remove_wp_version_strings( $src ) {
+ global $wp_version;
+ parse_str(parse_url($src, PHP_URL_QUERY), $query);
+ if ( !empty($query['ver']) && $query['ver'] === $wp_version ) {
+ $src = remove_query_arg('ver', $src);
+ }
+ return $src;
+}
+add_filter( 'script_loader_src', 'fjarrett_remove_wp_version_strings' );
+add_filter( 'style_loader_src', 'fjarrett_remove_wp_version_strings' );
+
+/* Hide WP version strings from generator meta tag */
+function wpmudev_remove_version() {
+return '';
+}
+add_filter('the_generator', 'wpmudev_remove_version');
+Secure wp-config.php
+.htaccess 
+<files wp-config.php>
+order allow,deny
+deny from all
+</files>
+Automatic Updates insert following in wp-config.php
+define( 'WP_AUTO_UPDATE_CORE', true );
+add_filter( 'auto_update_plugin', '__return_true' );
+add_filter( 'auto_update_theme', '__return_true' );
+Check media files
+
+SMB
+Set-SmbServerConfiguration -EnableSMB1Protocol $false -Force
+Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" DisableCompression -Type DWORD -Value 1 -Force
+Set-SmbServerConfiguration -EncryptData $true -Force
+Password protected sharing - and that whole panel
+Set-SmbServerConfiguration –EncryptData $true
+Clientstuff:
+sc.exe config lanmanworkstation depend= bowser/mrxsmb20/nsi
+sc.exe config mrxsmb10 start= disabled
+Disable NetBIOS over TCP/IP
+
+POWERSHELL
+Disable-PSRemoting -Force
+
+ADDS
+Anonymous LDAP bind is disabled
+
+FINDING VIRUSES
+PROCMON, VIRUSTOTAL

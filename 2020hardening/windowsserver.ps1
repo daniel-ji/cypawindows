@@ -171,7 +171,7 @@ disable-windowsoptionalfeature -online -featureName TelnetClient
 disable-windowsoptionalfeature -online -featureName SMB1Protocol
 
 
-#Auditpolicy
+#Auditpolicy - doesn't work
 auditpol /set /category:* /success:enable /failure:enable
 
 

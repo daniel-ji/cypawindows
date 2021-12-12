@@ -54,7 +54,7 @@ foreach($group in Get-LocalGroup -Name *) {
 
 pause
 
-function Manage-Functionality {
+function Set-Functionality {
     param (
         [string] $Functionality,
         [string[]] $RelatedServices,

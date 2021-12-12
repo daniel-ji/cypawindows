@@ -127,7 +127,7 @@ if ($ADDS -eq "Y") {
     exit
 }
 
-function Manage-Functionality {
+function Set-Functionality {
     param (
         [string] $Functionality,
         [string[]] $RelatedServices,

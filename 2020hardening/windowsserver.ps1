@@ -50,8 +50,8 @@ if ($ADDS -eq "Y") {
     Disable-ADACcount -Identity "DefaultAccount"
 
     #prompt kerberos wipe
-    $kerberos = Read-Host "Wipe user Kerberos settings? Y/y"
-    if ($kerberos -eq 'Y' -or $kerberos -eq 'y') {
+    $Kerberos = Read-Host "Wipe user Kerberos settings? Y/y"
+    if ($Kerberos -eq 'Y' -or $Kerberos -eq 'y') {
         Get-ADUser -Filter * | Set-ADAccountControl -DoesNotRequirePreAuth $true -UseDESKeyOnly $false
         Get-ADUser -Filter * | Set-ADUser -KerberosEncryptionType "None"
     }
@@ -127,55 +127,203 @@ if ($ADDS -eq "Y") {
     exit
 }
 
+function Manage-Functionality {
+    param (
+        [string] $Functionality,
+        [string[]] $RelatedServices,
+        [string[]] $RelatedFeatures
+    )
+
+    $Prompt = Read-Host "${Functionality}? [A/M/D/n]"
+
+    if ($Prompt -eq "D") {
+        foreach ($Service in $RelatedServices) {
+            Write-Output "Trying to disable $Service"
+            Get-Service -Name $Service | Set-Service -StartupType Disabled
+            Stop-Service -Force $Service
+        }
+        foreach ($Feature in $RelatedFeatures) {
+            Write-Output "Trying to uninstall $Feature"
+            Uninstall-WindowsFeature -Name $Feature
+        }
+    } elseif ($Prompt -eq "A") {
+        foreach ($Service in $RelatedServices) {
+            Write-Output "Trying to automatic $Service"
+            Get-Service -Name $Service | Set-Service -StartupType Automatic
+            Start-Service $Service
+        }
+        foreach ($Feature in $RelatedFeatures) {
+            Write-Output "Trying to enable $Feature"
+            Install-WindowsFeature -Name $Feature
+        }
+    } elseif ($Prompt -eq "M") {
+        foreach ($Service in $RelatedServices) {
+            Write-Output "Trying to manual $Service"
+            Get-Service -Name $Service | Set-Service -StartupType Manual
+            Start-Service $Service
+        }
+        foreach ($Feature in $RelatedFeatures) {
+            Write-Output "Trying to enable $Feature"
+            Install-WindowsFeature -Name $Feature
+        }
+    }
+}
+
+Manage-Functionality "Fax" @() @("Fax")
+Manage-Functionality "Print" @("Spooler") @("LPR-Port-Monitor",  "Internet-Print-Client", "Print-Services")
+Manage-Functionality "RDP" @("SessionEnv", "UmRdpService", "TermService") @("Remote-Desktop-Services")
+
 #Services
-$stopservices = @(
-    "Spooler"
+$StopServices = @(
     "iprip"
+    "AxInstSV"
+    "bthserv"
+    "CDPUserSvc"
+    "Browser"
+    "PimIndexMaintenanceSvc"
+    "dmwappushservice"
+    "MapsBroker"
+    "EapHost"
+    "fdPHost"
+    "FDResPub"
+    "lfsvc"
+    "SharedAccess"
+    "iphlpsvc"
+    "lltdsvc"
+    "AppVClient"
+    "NetTcpPortSharing"
+    "CscService"
+    "PrintNotify"
+    "QWAVE"
+    "RmSvc"
+    "RasMan"
+    "RasAuto"
+    "RemoteRegistry"
+    "RemoteAccess"
+    "RpcLocator"
+    "SensrSvc"
+    "SensorService"
+    "ScDeviceEnum"
+    "SCardSvr"
+    "SCPolicySvc"
     "SNMPTRAP"
     "SSDPSRV"
+    "WiaRpc"
+    "OneSyncSvc"
     "TapiSrv"
-    "telnet"
-    "lfsvc"
-    "MapsBroker"
-    "NetTcpPortSharing"
+    "Themes"
+    "upnphost"
+    "UserDataSvc"
+    "UnistoreSvc"
+    "UevAgentService"
+    "WalletService"
+    "WbioSrvc"
+    "Wcmsvc"
+    "stisvc"
+    "wisvc"
+    "icssvc"
+    "dot3svc"
     "XblAuthManager"
     "XblGameSave"
-    "XboxNetApiSvc"
-    "RpcLocator"
 )
-foreach ($service in $stopservices) {
-    Write-Output "Trying to disable $service"
-    Get-Service -Name $service | Set-Service -StartupType Disabled
-    Stop-Service -Force $service
+foreach ($Service in $StopServices) {
+    Write-Output "Trying to disable $Service"
+    Get-Service -Name $Service | Set-Service -StartupType Disabled
+    Stop-Service -Force $Service
 }
-$startservices = @(
+
+$ManualServices = @(
+    "BDESVC"
+    "diagsvc"
+    "IKEEXT"
+    "NaturalAuthentication"
+    "PolicyAgent"
+    "UsoSvc"
+    "WdNisSvc"
+    "wscsvc"
+    "wuauserv"
+    "svsvc"
+    "WerSvc"
+    "TrustedInstaller"
+)
+foreach ($Service in $ManualServices) {
+    Write-Output "Trying to manual $Service"
+    Get-Service -Name $Service | Set-Service -StartupType Manual
+    Start-Service $Service
+}
+
+$StartServices = @(
+    "Dhcp"
+    "Dnscache"
+    "DoSvc"
+    "DPS"
+    "emet_Service"
+    "gpsvc"
+    "LanmanWorkstation"
     "WSearch"
     "MpsSvc"
     "EventLog"
-    "Wuauserv"
     "WinDefend"
-    "WdNisSvc"
+    "Schedule"
+    "SecurityHealthService"
+    "Sense"
+    "sppsvc"
+    "LSM"
+    "RpcSs"
+    "SamSs"
+    "LanmanServer"
+    "SENS"
+    "SystemEventsBroker"
+    "WinRM"
 )
-foreach ($service in $startservices) {
-    Write-Output "Trying to enable $service"
-    Set-Service $service -StartupType Automatic
-    Start-Service $service
+foreach ($Service in $StartServices) {
+    Write-Output "Trying to enable $Service"
+    Set-Service $Service -StartupType Automatic
+    Start-Service $Service
 }
 
+Write-Output "Listing features..."
+pause
+
+Get-WindowsFeature | Where-Object {$_. installstate -eq "installed"} | Format-List Name,Installstate | more
+pause
+
 #Features
-disable-windowsoptionalfeature -online -featureName rasrip
-disable-windowsoptionalfeature -online -featureName WindowsMediaPlayer
-disable-windowsoptionalfeature -online -featureName SimpleTCP
-disable-windowsoptionalfeature -online -featureName SNMP
-disable-windowsoptionalfeature -online -featureName TelnetClient
-disable-windowsoptionalfeature -online -featureName SMB1Protocol
+$UninstallFeatures = @(
+    "WindowsMediaPlayer"
+    "Direct-Play"
+    "Remote-Assistance"
+    "RPC-over-HTTP-Proxy"
+    "Simple-TCPIP"
+    "FS-SMB1"
+    "Telnet-Client"
+    "PowerShell-V2"
+    "XPS-Viewer"
+    "FS-SyncShareService"
+    "RDC"
+    "SNMP-Service"
+    "TFTP-Client"
+)
+foreach ($Feature in $UninstallFeatures) {
+    Write-Output "Trying to uninstall $Feature"
+    Uninstall-WindowsFeature -Name $Feature
+}
+
+$InstallFeatures = @(
+    "Windows-Defender"
+)
+foreach ($Feature in $InstallFeatures) {
+    Write-Output "Trying to install $Feature"
+    Install-WindowsFeature -Name $Feature
+}
 
 
-#Auditpolicy - doesn't work
+#Auditpolicy
+Write-Output "Setting audit policy through auditpol"
 auditpol /set /category:* /success:enable /failure:enable
 
-
 #Firewall
+Write-Output "Turning firewall on"
 Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled True
 Set-MpPreference -DisableRealtimeMonitoring $false
 

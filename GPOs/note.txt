@@ -1,1 +1,5 @@
 rdp is not configured (kinda not; ask daniel)
+
+2238 is riskywindows
+
+6e5ad is riskyserver

@@ -22,7 +22,7 @@ if ($ADDS -eq "Y") {
     Search-ADAccount -lockedout | Select-Object Name, SamAccountName
     Get-ADUser -Filter * | Set-ADUser -PasswordNeverExpires $false -CannotChangePassword $false -ChangePasswordAtLogon $true -AllowReversiblePasswordEncryption $false -SmartcardLogonRequire $false -TrustedForDelegation $false
     Get-ADUser -Filter * | Disable-ADAccount
-    Remove-ADGroupMember -Identity "Administrators" -Member (Get-ADUser -Filter 'Name -ne "Administrator"') -Confirm:$False
+    Remove-ADGroupMember -Identity "Administrators" -Member (Get-ADUser -Filter 'Name -ne "nimda"') -Confirm:$False
 
     #authorized users
     $Password = convertto-securestring "Cyberpatriot2020" -asplaintext -force

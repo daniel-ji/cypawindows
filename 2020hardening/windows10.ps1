@@ -15,7 +15,7 @@ if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
 #all accounts
 Set-LocalUser -Name (Get-LocalUser *) -PasswordNeverExpires $false -UserMayChangePassword $true
 Get-LocalUser * | Disable-LocalUser
-Remove-LocalGroupMember -Group "Administrators" -Member (Get-LocalUser *)
+Remove-LocalGroupMember -Group "Administrators" -Member (Get-LocalUser * | Where-Object -Property Name -ne "nimda")
 
 #authorized users
 $Password = convertto-securestring "Cyberpatriot2020" -asplaintext -force

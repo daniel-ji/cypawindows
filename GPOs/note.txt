@@ -1,0 +1,1 @@
+rdp is not configured (kinda not; ask daniel)

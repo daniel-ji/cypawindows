@@ -8,5 +8,5 @@ gpupdate /force
 cd %~dp0
 copy LGPO.exe C:\Windows\System32
 
-lgpo.exe /g win1909r3 /v
+lgpo.exe /g windowsr4 /v
 pause

@@ -96,11 +96,11 @@ function Set-Functionality {
     }
 }
 
-Manage-Functionality "Fax" @("Fax") @()
-Manage-Functionality "IIS" @("IISADMIN") @()
-Manage-Functionality "FTP" @("FTPSVC") @()
-Manage-Functionality "Print" @("Spooler") @("Printing-PrintToPDFServices-Features",  "Printing-XPSServices-Features", "Printing-Foundation-Features", "Printing-Foundation-InternetPrinting-Client", "Printing-Foundation-LPDPrintService", "Printing-Foundation-LPRPortMonitor")
-Manage-Functionality "RDP" @("SessionEnv", "UmRdpService", "TermService")
+Set-Functionality "Fax" @("Fax") @()
+Set-Functionality "IIS" @("IISADMIN") @()
+Set-Functionality "FTP" @("FTPSVC") @()
+Set-Functionality "Print" @("Spooler") @("Printing-PrintToPDFServices-Features",  "Printing-XPSServices-Features", "Printing-Foundation-Features", "Printing-Foundation-InternetPrinting-Client", "Printing-Foundation-LPDPrintService", "Printing-Foundation-LPRPortMonitor")
+Set-Functionality "RDP" @("SessionEnv", "UmRdpService", "TermService")
 
 #Services
 $stopservices = @(
@@ -261,10 +261,12 @@ foreach ($Feature in $UninstallFeatures) {
     Uninstall-WindowsFeature -Name $Feature
 }
 
-#Auditpolicy - doesn't work
+#Auditpolicy
+Write-Output "Setting audit policy through auditpol"
 auditpol /set /category:* /success:enable /failure:enable
 
 #Firewall
+Write-Output "Turning firewall on"
 Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled True
 Set-MpPreference -DisableRealtimeMonitoring $false
 

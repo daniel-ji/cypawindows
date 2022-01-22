@@ -169,9 +169,9 @@ function Set-Functionality {
     }
 }
 
-Manage-Functionality "Fax" @() @("Fax")
-Manage-Functionality "Print" @("Spooler") @("LPR-Port-Monitor",  "Internet-Print-Client", "Print-Services")
-Manage-Functionality "RDP" @("SessionEnv", "UmRdpService", "TermService") @("Remote-Desktop-Services")
+Set-Functionality "Fax" @() @("Fax")
+Set-Functionality "Print" @("Spooler") @("LPR-Port-Monitor",  "Internet-Print-Client", "Print-Services")
+Set-Functionality "RDP" @("SessionEnv", "UmRdpService", "TermService") @("Remote-Desktop-Services")
 
 #Services
 $StopServices = @(
